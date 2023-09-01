@@ -1,0 +1,58 @@
+ke'y
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8" />
+
+  <title></title>
+
+  <style>
+
+  </style>
+</head>
+
+<body>
+
+</body>
+
+<script>
+/**
+ * 用于存储对象的缓存类-具有过期和对象计数.限制
+ * @param {number} maxObjects - 限制缓存中能够存储的对象的最大数量
+ * @param {number} expirationTime - 指定缓存中存储的对象的过期时间
+ */
+class Cache {
+  constructor(maxObjects, expirationTime) {
+    this.maxObjects = maxObjects;
+    this.expirationTime = expirationTime * 1000; // 转换为毫秒
+    this.cache = new Map();
+  }
+
+  set(id, object) {
+    const currentTime = new Date().getTime();
+    if (this.cache.has(id)) {
+      this.cache.delete(id);
+    } else if (this.cache.size >= this.maxObjects) {
+      const oldestKey = this.cache.keys().next().value;
+      this.cache.delete(oldestKey); // 删除最久未使用的对象
+    }
+    this.cache.set(id, { object, timestamp: currentTime });
+  }
+
+  get(id) {
+    if (this.cache.has(id)) {
+      const { object, timestamp } = this.cache.get(id);
+      const currentTime = new Date().getTime();
+      if (currentTime - timestamp <= this.expirationTime) {
+        return object;
+      } else {
+        this.cache.delete(id); // 对象已过期，删除它
+      }
+    }
+    return null;
+  }
+}
+</script>
+
+</html>
